@@ -25,9 +25,8 @@ La carte (mviewer) se synchronise lors de la sélection d'un filtre (superset) e
 
 ### Fonctionnement de l'addon
 
-1. **Handlebars** : L'addon utilise Handlebars pour générer des templates dynamiques qui actualisent mviewer.
-2. **Configuration** : Les paramètres de mviewer (comme les couches, les styles, etc.) sont configurés via des variables passées au template.
-3. **Rendu** : Dans Superset, la carte mviewer est intégré comme un composant interactif.
+1. **Configuration** : Les paramètres de mviewer (comme les couches, les styles de masque, etc.) sont configurés via le fichier `JS` de l'addon mviewer.
+2. **Rendu** : Dans Superset, la carte mviewer est intégré comme un composant Handlebars pour actualiser mviewer en fonction des filtres.
 
 ### Fonctionnement dans Superset
 
@@ -38,8 +37,6 @@ La carte (mviewer) se synchronise lors de la sélection d'un filtre (superset) e
 <iframe width="800" height="500" style="border:none;" src="https://www.geo2france.fr/mviewer/?l=ocs2d_enaf_2021*enaf&lb=osmgp2&config=apps/geo2france/ocs2d_enaf_ss.xml&mode=u&epci={{#each data}}{{#if @last}}{{codepci}}{{else}}{{codepci}},{{/if}}{{/each}}&communes={{#each data}}{{#if @last}}{{codgeo}}{{else}}{{codgeo}},{{/if}}{{/each}}&scot={{#each data}}{{#if @last}}{{codscot}}{{else}}{{codscot}},{{/if}}{{/each}}"></iframe>
 ```
 
-3. **Interactivité** : Les cartes mviewer sont entièrement interactives, permettant des zooms, des filtres, et d'autres actions directement dans Superset.
-
 ---
 
 ## Custom Component mviewer (dossier `poc`) - Non retenu pour la production
@@ -49,21 +46,25 @@ Cette preuve de concept explorait une alternative pour intégrer mviewer dans Su
 ### Cas d'usage
 
 Avoir une cartographie d'une couche disposant de plusieurs états (exemple : réalisé, en cours, abandonné) intégré dans un tableau de bord d'indicateurs.
-La carte (mviewer) se synchronise lors de la sélection d'un filtre (superset) en exposant (via un masque) la zone géographique concernée.
+La carte (mviewer) se synchronise lors de la sélection d'un filtre (superset) en affichant un ou plusieurs états d'une couche spécifique (c-a-d un élément de légende).
 
 ### Fonctionnement de l'addon
 
-1. **Approche alternative** : L'addon utilisait une méthode différente pour intégrer mviewer, comme une iframe ou une API personnalisée.
-2. **Problèmes rencontrés** : Des problèmes de performance, de compatibilité ou de maintenance ont conduit à l'abandon de cette approche.
+1. **Configuration** : Les paramètres de mviewer (comme les couches, les états, etc.) sont configurés via le fichier `JS` de l'addon mviewer.
+2. **Rendu** : Dans Superset, la carte mviewer est intégré comme un composant Handlebars pour actualiser mviewer en fonction des filtres.
+
+Problème au lieu d'avoir une seule et même couche et de traiter l'appel selon un élement de légende, la couche a été éclatée pour chaque état et publié comme 5 flux distinct. Ce n'est pas le comportement attendu obligeant l'administrateur de données à dupliquer ces flux. Sur une donnée disposant potentiellement d'un grand nombre de classes, cela devient rapidement ingérable.
 
 ### Fonctionnement dans Superset
 
-1. **Expérimentation** : Bien que fonctionnelle, cette méthode n'offrait pas une expérience utilisateur aussi fluide ou fiable que celle du dossier `addons`.
-2. **Résultat** : La décision a été prise de ne pas déployer cette solution en production.
+1. **Installation** : La carte mviewer est appelé via un graphique de type Handlebar dans Superset.
+2. **Utilisation** : Les utilisateurs ajoute dans le composant handlebar le code de l'iframe mviewer (mode u conseillé) en ajoutant les variables mentionnées dans le fichier js de l'addon.
+
+```handlebars
+<iframe width="800" height="400" style="border:none;" src="https://localhost/mv/?layer={{#each data}}{{#if @last}}{{etat}}{{else}}{{etat}},{{/if}}{{/each}}&departement={{#each data}}{{#if @last}}{{dep}}{{else}}{{dep}},{{/if}}{{/each}}&epci={{#each data}}{{#if @last}}{{epci}}{{else}}{{epci}},{{/if}}{{/each}}&x=701046&y=6870863&z=7.245605029440839&l=DEPARTEMENT*polygone_bord_orange_transparent%2Crefus*%2Cabandon*%2Cinstruction*%2Caccorde_constr*%2Crealise*&lb=osmgp1&config=apps/my_project.xml&mode=u"></iframe>
+```
 
 ---
-
-### Installation et configuration
 
 ### Contributions
 
